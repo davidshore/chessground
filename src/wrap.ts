@@ -54,10 +54,15 @@ export default function wrap(element: HTMLElement, s: State, relative: boolean):
     container.appendChild(ghost);
   }
 
+  const dragSquare: HTMLElement = createEl('square', 'over');
+  setVisible(dragSquare, false);
+  container.appendChild(dragSquare);
+
   return {
     board,
     container,
     ghost,
+    dragSquare,
     svg
   };
 }

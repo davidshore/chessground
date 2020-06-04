@@ -42,6 +42,7 @@ export interface Elements {
   board: HTMLElement;
   container: HTMLElement;
   ghost?: HTMLElement;
+  dragSquare: HTMLElement;
   svg?: SVGElement;
 }
 export interface Dom {

@@ -19,31 +19,31 @@ interface SquareClasses { [key: string]: string }
 // in case of bugs, blame @veloce
 export default function render(s: State): void {
   const asWhite: boolean = whitePov(s),
-  posToTranslate = s.dom.relative ? util.posToTranslateRel : util.posToTranslateAbs(s.dom.bounds()),
-  translate = s.dom.relative ? util.translateRel : util.translateAbs,
-  boardEl: HTMLElement = s.dom.elements.board,
-  pieces: cg.Pieces = s.pieces,
-  curAnim: AnimCurrent | undefined = s.animation.current,
-  anims: AnimVectors = curAnim ? curAnim.plan.anims : {},
-  fadings: AnimFadings = curAnim ? curAnim.plan.fadings : {},
-  curDrag: DragCurrent | undefined = s.draggable.current,
-  squares: SquareClasses = computeSquareClasses(s),
-  samePieces: SamePieces = {},
-  sameSquares: SameSquares = {},
-  movedPieces: MovedPieces = {},
-  movedSquares: MovedSquares = {},
-  piecesKeys: cg.Key[] = Object.keys(pieces) as cg.Key[];
+    posToTranslate = s.dom.relative ? util.posToTranslateRel : util.posToTranslateAbs(s.dom.bounds()),
+    translate = s.dom.relative ? util.translateRel : util.translateAbs,
+    boardEl: HTMLElement = s.dom.elements.board,
+    pieces: cg.Pieces = s.pieces,
+    curAnim: AnimCurrent | undefined = s.animation.current,
+    anims: AnimVectors = curAnim ? curAnim.plan.anims : {},
+    fadings: AnimFadings = curAnim ? curAnim.plan.fadings : {},
+    curDrag: DragCurrent | undefined = s.draggable.current,
+    squares: SquareClasses = computeSquareClasses(s),
+    samePieces: SamePieces = {},
+    sameSquares: SameSquares = {},
+    movedPieces: MovedPieces = {},
+    movedSquares: MovedSquares = {},
+    piecesKeys: cg.Key[] = Object.keys(pieces) as cg.Key[];
   let k: cg.Key,
-  p: cg.Piece | undefined,
-  el: cg.PieceNode | cg.SquareNode | undefined,
-  pieceAtKey: cg.Piece | undefined,
-  elPieceName: PieceName,
-  anim: AnimVector | undefined,
-  fading: cg.Piece | undefined,
-  pMvdset: cg.PieceNode[] | undefined,
-  pMvd: cg.PieceNode | undefined,
-  sMvdset: cg.SquareNode[] | undefined,
-  sMvd: cg.SquareNode | undefined;
+    p: cg.Piece | undefined,
+    el: cg.PieceNode | cg.SquareNode | undefined,
+    pieceAtKey: cg.Piece | undefined,
+    elPieceName: PieceName,
+    anim: AnimVector | undefined,
+    fading: cg.Piece | undefined,
+    pMvdset: cg.PieceNode[] | undefined,
+    pMvd: cg.PieceNode | undefined,
+    sMvdset: cg.SquareNode[] | undefined,
+    sMvd: cg.SquareNode | undefined;
 
   // walk over all board dom elements, apply animations and flag moved pieces
   el = boardEl.firstChild as cg.PieceNode | cg.SquareNode | undefined;
@@ -163,8 +163,8 @@ export default function render(s: State): void {
       else {
 
         const pieceName = pieceNameOf(p),
-        pieceNode = createEl('piece', pieceName) as cg.PieceNode,
-        pos = key2pos(k);
+          pieceNode = createEl('piece', pieceName) as cg.PieceNode,
+          pos = key2pos(k);
 
         pieceNode.cgPiece = pieceName;
         pieceNode.cgKey = k;

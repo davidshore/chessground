@@ -1,0 +1,21 @@
+<html>
+
+<head>
+  <script src="./dist/chessground.js"></script>
+  <link rel="stylesheet" href="./assets/chessground.css" />
+  <link rel="stylesheet" href="./assets/theme.css" />
+</head>
+
+<body>
+  <div class="chesshotel plastic">
+    <div id="board" style="width:608px;height:608px" />
+  </div>
+
+  <script>
+    const config = {};
+    const board = document.getElementById("board");
+    const ground = Chessground(board, config);
+  </script>
+</body>
+
+</html>

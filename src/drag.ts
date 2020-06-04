@@ -26,8 +26,8 @@ export function start(s: State, e: cg.MouchEvent): void {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
   const bounds = s.dom.bounds(),
-  position = util.eventPosition(e) as cg.NumberPair,
-  orig = board.getKeyAtDomPos(position, board.whitePov(s), bounds);
+    position = util.eventPosition(e) as cg.NumberPair,
+    orig = board.getKeyAtDomPos(position, board.whitePov(s), bounds);
   if (!orig) return;
   const piece = s.pieces[orig];
   const previouslySelected = s.selected;
@@ -39,8 +39,8 @@ export function start(s: State, e: cg.MouchEvent): void {
   // (and the board is not for viewing only), touches are likely intended to
   // select squares.
   if (e.cancelable !== false &&
-      (!e.touches || !s.movable.color || piece || previouslySelected || pieceCloseTo(s, position))) /* eslint-disable-line */
-        e.preventDefault();
+    (!e.touches || !s.movable.color || piece || previouslySelected || pieceCloseTo(s, position))) /* eslint-disable-line */
+    e.preventDefault();
   const hadPremove = !!s.premovable.current;
   const hadPredrop = !!s.predroppable.current;
   s.stats.ctrlKey = e.ctrlKey;
@@ -51,6 +51,8 @@ export function start(s: State, e: cg.MouchEvent): void {
   }
   const stillSelected = s.selected === orig;
   const element = pieceElementByKey(s, orig);
+
+
   if (piece && element && stillSelected && board.isDraggable(s, orig)) {
     const squareBounds = computeSquareBounds(orig, board.whitePov(s), bounds);
     s.draggable.current = {
@@ -78,6 +80,11 @@ export function start(s: State, e: cg.MouchEvent): void {
       util.translateAbs(ghost, util.posToTranslateAbs(bounds)(util.key2pos(orig), board.whitePov(s)));
       util.setVisible(ghost, true);
     }
+
+    // const dragSquare = s.dom.elements.dragSquare;
+    // util.setVisible(dragSquare, true);
+
+
     processDrag(s);
   } else {
     if (hadPremove) board.unsetPremove(s);
@@ -88,14 +95,14 @@ export function start(s: State, e: cg.MouchEvent): void {
 
 export function pieceCloseTo(s: State, pos: cg.NumberPair): boolean {
   const asWhite = board.whitePov(s),
-  bounds = s.dom.bounds(),
-  radiusSq = Math.pow(bounds.width / 8, 2);
+    bounds = s.dom.bounds(),
+    radiusSq = Math.pow(bounds.width / 8, 2);
   for (const key in s.pieces) {
     const squareBounds = computeSquareBounds(key as cg.Key, asWhite, bounds),
-    center: cg.NumberPair = [
-      squareBounds.left + squareBounds.width / 2,
-      squareBounds.top + squareBounds.height / 2
-    ];
+      center: cg.NumberPair = [
+        squareBounds.left + squareBounds.width / 2,
+        squareBounds.top + squareBounds.height / 2
+      ];
     if (util.distanceSq(center, pos) <= radiusSq) return true;
   }
   return false;
@@ -110,14 +117,16 @@ export function dragNewPiece(s: State, piece: cg.Piece, e: cg.MouchEvent, force?
   s.dom.redraw();
 
   const position = util.eventPosition(e) as cg.NumberPair,
-  asWhite = board.whitePov(s),
-  bounds = s.dom.bounds(),
-  squareBounds = computeSquareBounds(key, asWhite, bounds);
+    asWhite = board.whitePov(s),
+    bounds = s.dom.bounds(),
+    squareBounds = computeSquareBounds(key, asWhite, bounds);
 
   const rel: cg.NumberPair = [
     (asWhite ? 0 : 7) * squareBounds.width + bounds.left,
     (asWhite ? 8 : -1) * squareBounds.height + bounds.top
   ];
+
+
 
   s.draggable.current = {
     orig: key,
@@ -163,10 +172,31 @@ function processDrag(s: State): void {
           cur.epos[1] - cur.rel[1]
         ];
 
+
+        //move square
+        const dest = board.getKeyAtDomPos(cur.epos, board.whitePov(s), s.dom.bounds());
+        const dragSquare = s.dom.elements.dragSquare;
+        if (dest && board.canMove(s, cur.orig, dest)) {
+          const trans = util.posToTranslateAbs(s.dom.bounds())(util.key2pos(dest), board.whitePov(s));
+          util.translateAbs(dragSquare, trans);
+          util.setVisible(dragSquare, true);
+        } else {
+          util.setVisible(dragSquare, false);
+        }
+
+
+
         // move piece
         const translation = util.posToTranslateAbs(s.dom.bounds())(cur.origPos, board.whitePov(s));
         translation[0] += cur.pos[0] + cur.dec[0];
         translation[1] += cur.pos[1] + cur.dec[1];
+        // console.log(translation, 'translation')
+        // 1. get square key
+        // 2. set what square it is over in state
+        // 3. render all square elements
+
+
+
         util.translateAbs(cur.element, translation);
       }
     }
@@ -233,6 +263,7 @@ export function cancel(s: State): void {
 function removeDragElements(s: State): void {
   const e = s.dom.elements;
   if (e.ghost) util.setVisible(e.ghost, false);
+  util.setVisible(e.dragSquare, false);
 }
 
 function computeSquareBounds(key: cg.Key, asWhite: boolean, bounds: ClientRect): cg.Rect {
