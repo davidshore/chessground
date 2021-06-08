@@ -1,15 +1,14 @@
-import { State } from './state'
-import * as board from './board'
-import { write as fenWrite } from './fen'
-import { Config, configure } from './config'
-import { anim, render } from './anim'
-import { cancel as dragCancel, dragNewPiece } from './drag'
-import { DrawShape } from './draw'
-import explosion from './explosion'
-import * as cg from './types'
+import { State } from './state';
+import * as board from './board';
+import { write as fenWrite } from './fen';
+import { Config, configure } from './config';
+import { anim, render } from './anim';
+import { cancel as dragCancel, dragNewPiece } from './drag';
+import { DrawShape } from './draw';
+import { explosion } from './explosion';
+import * as cg from './types';
 
 export interface Api {
-
   // reconfigure the instance. Accepts all config options, except for viewOnly & drawable.visible.
   // board will be animated accordingly, if animations are enabled.
   set(config: Config): void;
@@ -79,14 +78,12 @@ export interface Api {
 
 // see API types and documentations in dts/api.d.ts
 export function start(state: State, redrawAll: cg.Redraw): Api {
-
   function toggleOrientation(): void {
     board.toggleOrientation(state);
     redrawAll();
-  };
+  }
 
   return {
-
     set(config): void {
       if (config.orientation && config.orientation !== state.orientation) toggleOrientation();
       (config.fen ? anim : render)(state => configure(state, config), state);
@@ -145,11 +142,17 @@ export function start(state: State, redrawAll: cg.Redraw): Api {
     },
 
     cancelMove(): void {
-      render(state => { board.cancelMove(state); dragCancel(state); }, state);
+      render(state => {
+        board.cancelMove(state);
+        dragCancel(state);
+      }, state);
     },
 
     stop(): void {
-      render(state => { board.stop(state); dragCancel(state); }, state);
+      render(state => {
+        board.stop(state);
+        dragCancel(state);
+      }, state);
     },
 
     explode(keys: cg.Key[]): void {
@@ -157,11 +160,11 @@ export function start(state: State, redrawAll: cg.Redraw): Api {
     },
 
     setAutoShapes(shapes: DrawShape[]): void {
-      render(state => state.drawable.autoShapes = shapes, state);
+      render(state => (state.drawable.autoShapes = shapes), state);
     },
 
     setShapes(shapes: DrawShape[]): void {
-      render(state => state.drawable.shapes = shapes, state);
+      render(state => (state.drawable.shapes = shapes), state);
     },
 
     getKeyAtDomPos(pos): cg.Key | undefined {
@@ -171,13 +174,13 @@ export function start(state: State, redrawAll: cg.Redraw): Api {
     redrawAll,
 
     dragNewPiece(piece, event, force): void {
-      dragNewPiece(state, piece, event, force)
+      dragNewPiece(state, piece, event, force);
     },
 
     destroy(): void {
       board.stop(state);
       state.dom.unbind && state.dom.unbind();
       state.dom.destroyed = true;
-    }
+    },
   };
 }

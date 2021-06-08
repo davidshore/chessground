@@ -1,8 +1,8 @@
-import { State } from './state'
-import { setCheck, setSelected } from './board'
-import { read as fenRead } from './fen'
-import { DrawShape, DrawBrush } from './draw'
-import * as cg from './types'
+import { HeadlessState } from './state';
+import { setCheck, setSelected } from './board';
+import { read as fenRead } from './fen';
+import { DrawShape, DrawBrushes } from './draw';
+import * as cg from './types';
 
 export interface Config {
   fen?: cg.FEN; // chess position in Forsyth notation
@@ -29,9 +29,7 @@ export interface Config {
   movable?: {
     free?: boolean; // all moves are valid - board editor
     color?: cg.Color | 'both'; // color that can move. white | black | both | undefined
-    dests?: {
-      [key: string]: cg.Key[];
-    }; // valid moves. {"a2" ["a3" "a4"] "b1" ["a3" "c3"]}
+    dests?: cg.Dests; // valid moves. {"a2" ["a3" "a4"] "b1" ["a3" "c3"]}
     showDests?: boolean; // whether to add the move-dest class on squares
     events?: {
       after?: (orig: cg.Key, dest: cg.Key, metadata: cg.MoveMetadata) => void; // called after the move has been played
@@ -46,7 +44,7 @@ export interface Config {
     dests?: cg.Key[]; // premove destinations for the current selection
     events?: {
       set?: (orig: cg.Key, dest: cg.Key, metadata?: cg.SetPremoveMetadata) => void; // called after the premove has been set
-      unset?: () => void;  // called after the premove has been unset
+      unset?: () => void; // called after the premove has been unset
     };
   };
   predroppable?: {
@@ -60,7 +58,6 @@ export interface Config {
     enabled?: boolean; // allow moves & premoves to use drag'n drop
     distance?: number; // minimum distance to initiate a drag; in pixels
     autoDistance?: boolean; // lets chessground set distance to zero when user drags pieces
-    centerPiece?: boolean; // center the piece on cursor at drag start
     showGhost?: boolean; // show ghost of piece being dragged
     deleteOnDropOff?: boolean; // delete a piece when it is dropped off the board
   };
@@ -80,10 +77,11 @@ export interface Config {
   drawable?: {
     enabled?: boolean; // can draw
     visible?: boolean; // can view
+    defaultSnapToValidMove?: boolean;
     eraseOnClick?: boolean;
     shapes?: DrawShape[];
     autoShapes?: DrawShape[];
-    brushes?: DrawBrush[];
+    brushes?: DrawBrushes;
     pieces?: {
       baseUrl?: string;
     };
@@ -91,10 +89,10 @@ export interface Config {
   };
 }
 
-export function configure(state: State, config: Config): void {
-
-  // don't merge destinations. Just override.
-  if (config.movable && config.movable.dests) state.movable.dests = undefined;
+export function configure(state: HeadlessState, config: Config): void {
+  // don't merge destinations and autoShapes. Just override.
+  if (config.movable?.dests) state.movable.dests = undefined;
+  if (config.drawable?.autoShapes) state.drawable.autoShapes = [];
 
   merge(state, config);
 
@@ -105,8 +103,8 @@ export function configure(state: State, config: Config): void {
   }
 
   // apply config values that could be undefined yet meaningful
-  if (config.hasOwnProperty('check')) setCheck(state, config.check || false);
-  if (config.hasOwnProperty('lastMove') && !config.lastMove) state.lastMove = undefined;
+  if ('check' in config) setCheck(state, config.check || false);
+  if ('lastMove' in config && !config.lastMove) state.lastMove = undefined;
   // in case of ZH drop last move, there's a single square.
   // if the previous last move had two squares,
   // the merge algorithm will incorrectly keep the second square.
@@ -119,17 +117,21 @@ export function configure(state: State, config: Config): void {
   if (!state.animation.duration || state.animation.duration < 100) state.animation.enabled = false;
 
   if (!state.movable.rookCastle && state.movable.dests) {
-    const rank = state.movable.color === 'white' ? 1 : 8,
-    kingStartPos = 'e' + rank,
-    dests = state.movable.dests[kingStartPos],
-    king = state.pieces[kingStartPos];
+    const rank = state.movable.color === 'white' ? '1' : '8',
+      kingStartPos = ('e' + rank) as cg.Key,
+      dests = state.movable.dests.get(kingStartPos),
+      king = state.pieces.get(kingStartPos);
     if (!dests || !king || king.role !== 'king') return;
-    state.movable.dests[kingStartPos] = dests.filter(d =>
-      !((d === 'a' + rank) && dests.indexOf('c' + rank as cg.Key) !== -1) &&
-        !((d === 'h' + rank) && dests.indexOf('g' + rank as cg.Key) !== -1)
+    state.movable.dests.set(
+      kingStartPos,
+      dests.filter(
+        d =>
+          !(d === 'a' + rank && dests.includes(('c' + rank) as cg.Key)) &&
+          !(d === 'h' + rank && dests.includes(('g' + rank) as cg.Key))
+      )
     );
   }
-};
+}
 
 function merge(base: any, extend: any): void {
   for (const key in extend) {

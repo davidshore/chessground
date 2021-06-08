@@ -1,11 +1,11 @@
-import * as fen from './fen'
-import { AnimCurrent } from './anim'
-import { DragCurrent } from './drag'
-import { Drawable } from './draw'
-import { timer } from './util'
+import * as fen from './fen';
+import { AnimCurrent } from './anim';
+import { DragCurrent } from './drag';
+import { Drawable } from './draw';
+import { timer } from './util';
 import * as cg from './types';
 
-export interface State {
+export interface HeadlessState {
   pieces: cg.Pieces;
   orientation: cg.Color; // board orientation. white | black
   turnColor: cg.Color; // turn to play. white | black
@@ -47,12 +47,13 @@ export interface State {
     current?: cg.KeyPair; // keys of the current saved premove ["e2" "e4"]
     events: {
       set?: (orig: cg.Key, dest: cg.Key, metadata?: cg.SetPremoveMetadata) => void; // called after the premove has been set
-      unset?: () => void;  // called after the premove has been unset
+      unset?: () => void; // called after the premove has been unset
     };
   };
   predroppable: {
     enabled: boolean; // allow predrops for color that can not move
-    current?: { // current saved predrop {role: 'knight'; key: 'e4'}
+    current?: {
+      // current saved predrop {role: 'knight'; key: 'e4'}
       role: cg.Role;
       key: cg.Key;
     };
@@ -65,7 +66,6 @@ export interface State {
     enabled: boolean; // allow moves & premoves to use drag'n drop
     distance: number; // minimum distance to initiate a drag; in pixels
     autoDistance: boolean; // lets chessground set distance to zero when user drags pieces
-    centerPiece: boolean; // center the piece on cursor at drag start
     showGhost: boolean; // show ghost of piece being dragged
     deleteOnDropOff: boolean; // delete a piece when it is dropped off the board
     current?: DragCurrent;
@@ -95,11 +95,14 @@ export interface State {
   };
   drawable: Drawable;
   exploding?: cg.Exploding;
-  dom: cg.Dom;
   hold: cg.Timer;
 }
 
-export function defaults(): Partial<State> {
+export interface State extends HeadlessState {
+  dom: cg.Dom;
+}
+
+export function defaults(): HeadlessState {
   return {
     pieces: fen.read(fen.initial),
     orientation: 'white',
@@ -113,52 +116,52 @@ export function defaults(): Partial<State> {
     pieceKey: false,
     highlight: {
       lastMove: true,
-      check: true
+      check: true,
     },
     animation: {
       enabled: true,
-      duration: 200
+      duration: 200,
     },
     movable: {
       free: true,
       color: 'both',
       showDests: true,
       events: {},
-      rookCastle: true
+      rookCastle: true,
     },
     premovable: {
       enabled: true,
       showDests: true,
       castle: true,
-      events: {}
+      events: {},
     },
     predroppable: {
       enabled: false,
-      events: {}
+      events: {},
     },
     draggable: {
       enabled: true,
       distance: 3,
       autoDistance: true,
-      centerPiece: true,
       showGhost: true,
-      deleteOnDropOff: false
+      deleteOnDropOff: false,
     },
     dropmode: {
-      active: false
+      active: false,
     },
     selectable: {
-      enabled: true
+      enabled: true,
     },
     stats: {
       // on touchscreen, default to "tap-tap" moves
       // instead of drag
-      dragged: !('ontouchstart' in window)
+      dragged: !('ontouchstart' in window),
     },
     events: {},
     drawable: {
       enabled: true, // can draw
       visible: true, // can view
+      defaultSnapToValidMove: true,
       eraseOnClick: true,
       shapes: [],
       autoShapes: [],
@@ -170,13 +173,18 @@ export function defaults(): Partial<State> {
         paleBlue: { key: 'pb', color: '#003088', opacity: 0.4, lineWidth: 15 },
         paleGreen: { key: 'pg', color: '#15781B', opacity: 0.4, lineWidth: 15 },
         paleRed: { key: 'pr', color: '#882020', opacity: 0.4, lineWidth: 15 },
-        paleGrey: { key: 'pgr', color: '#4a4a4a', opacity: 0.35, lineWidth: 15 }
+        paleGrey: {
+          key: 'pgr',
+          color: '#4a4a4a',
+          opacity: 0.35,
+          lineWidth: 15,
+        },
       },
       pieces: {
-        baseUrl: 'https://lichess1.org/assets/piece/cburnett/'
+        baseUrl: 'https://lichess1.org/assets/piece/cburnett/',
       },
-      prevSvgHash: ''
+      prevSvgHash: '',
     },
-    hold: timer()
+    hold: timer(),
   };
 }
