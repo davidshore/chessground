@@ -138,14 +138,14 @@ function animate<A>(mutation: Mutation<A>, state: State): A {
   const result = mutation(state);
   const plan = computePlan(prevPieces, state);
 
-  if (plan.anims.size) {
-    const capture = hasCapture(plan.anims, prevPieces);
-    if (capture) {
-      console.log('capture');
-    } else {
-      console.log('not capture');
-    }
-  }
+  // if (plan.anims.size) {
+  //   const capture = hasCapture(plan.anims, prevPieces);
+  //   if (capture) {
+  //     console.log('capture');
+  //   } else {
+  //     console.log('not capture');
+  //   }
+  // }
 
   if (plan.anims.size || plan.fadings.size) {
     const alreadyRunning = state.animation.current && state.animation.current.start;
