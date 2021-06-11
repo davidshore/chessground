@@ -19,7 +19,6 @@
   },
   "scripts": {
     "prepare": "npm run compile",
-    "prepack": "npm run compile",
     "compile": "tsc --outDir . --sourceMap --declaration",
     "lint": "eslint src/*.ts",
     "format": "prettier --write .",
